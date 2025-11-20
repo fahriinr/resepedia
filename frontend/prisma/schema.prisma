@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * Models generated from the provided ERD.
+ * - Field names are mapped to more "JS/TS friendly" PascalCase model names.
+ * - Table names are mapped to the original lowercase names from the diagram.
+ * - Adjust types if you want stricter constraints (eg. takaran -> Float).
+ */
+
+model User {
+  id_user   Int    @id @default(autoincrement())
+  nama_user String
+  email     String
+  password  String
+
+  resep       Resep[]          @relation("UserResep")
+  user_inputs UserInput[]
+  favorit     FavoritResep[]
+  komentar    KomentarRating[]
+  usulan      UsulanBahan[]
+
+  @@map("user")
+}
+
+model Bahan {
+  id_bahan   Int     @id @default(autoincrement())
+  nama_bahan String
+  satuan     String?
+
+  bahan_resep BahanResep[]
+  user_inputs UserInput[]
+
+  @@map("bahan")
+}
+
+model KategoriResep {
+  id_kategori   Int    @id @default(autoincrement())
+  nama_kategori String
+
+  resep Resep[]
+
+  @@map("kategori_resep")
+}
+
+model Resep {
+  id_resep            Int       @id @default(autoincrement())
+  id_user             Int
+  id_kategori         Int
+  nama_resep          String
+  deskripsi           String?
+  langkah_memasak     String? // bisa JSON/text berisi langkah
+  waktu_memasak       Int? // menit (asumsi)
+  foto_resep          String? // url atau path
+  tanggal_ditambahkan DateTime? @default(now())
+
+  user          User             @relation("UserResep", fields: [id_user], references: [id_user], onDelete: Cascade)
+  kategori      KategoriResep    @relation(fields: [id_kategori], references: [id_kategori], onDelete: Cascade)
+  bahan_resep   BahanResep[]
+  favorit_resep FavoritResep[]
+  komentar      KomentarRating[]
+
+  @@index([id_user])
+  @@index([id_kategori])
+  @@map("resep")
+}
+
+model BahanResep {
+  id_resep_bahan Int     @id @default(autoincrement())
+  id_bahan       Int
+  id_resep       Int
+  takaran        String? // contoh: "2 sdm", "150 gram". Jika mau angka: ubah ke Float + satuan terpisah
+
+  bahan Bahan @relation(fields: [id_bahan], references: [id_bahan], onDelete: Cascade)
+  resep Resep @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade)
+
+  @@index([id_bahan])
+  @@index([id_resep])
+  @@map("bahan_resep")
+}
+
+model UserInput {
+  id_user_input Int      @id @default(autoincrement())
+  id_user       Int
+  id_bahan      Int
+  tanggal_input DateTime @default(now())
+
+  user  User  @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+  bahan Bahan @relation(fields: [id_bahan], references: [id_bahan], onDelete: Cascade)
+
+  @@index([id_user])
+  @@index([id_bahan])
+  @@map("user_input")
+}
+
+model FavoritResep {
+  id_favorit_resep Int      @id @default(autoincrement())
+  id_user          Int
+  id_resep         Int
+  tanggal_disimpan DateTime @default(now())
+
+  user  User  @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+  resep Resep @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade)
+
+  @@unique([id_user, id_resep], map: "uniq_user_resep_fav") // mencegah duplicate favorit
+  @@index([id_user])
+  @@index([id_resep])
+  @@map("favorit_resep")
+}
+
+model KomentarRating {
+  id_komentar      Int      @id @default(autoincrement())
+  id_user          Int
+  id_resep         Int
+  isi_komentar     String?
+  rating           Int? // bisa 1..5, validasi di aplikasi
+  tanggal_komentar DateTime @default(now())
+
+  user  User  @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+  resep Resep @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade)
+
+  @@index([id_user])
+  @@index([id_resep])
+  @@map("komentar_rating")
+}
+
+model UsulanBahan {
+  id_usulan    Int      @id @default(autoincrement())
+  id_user      Int
+  nama_bahan   String
+  status       String? // contoh: pending/accepted/rejected
+  tanggal_usul DateTime @default(now())
+
+  user User @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+
+  @@index([id_user])
+  @@map("usulan_bahan")
+}
