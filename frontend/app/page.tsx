@@ -1,65 +1,104 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import Link from "next/link";   
+import IngredientInput from "@/components/IngredientInput";
+import IngredientTag from "@/components/IngredientTag";
+import IngredientList from "@/components/IngredientList";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import TodaysPick from "@/components/todayspick";
+
+export default function HomePage() {
+  const [ingredients, setIngredients] = useState<string[]>([]);
+
+  const addIngredient = (v: string) => {
+    if (!ingredients.includes(v)) {
+      setIngredients((prev) => [...prev, v]);
+    }
+  };
+
+  const removeIngredient = (i: number) => {
+    setIngredients((prev) => prev.filter((_, idx) => idx !== i));
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-green-50 pb-20">
+
+    <section
+        className="relative text-center py-24 bg-cover bg-center bg-no-repeat">
+
+        <div className="relative z-10">
+          <motion.h1 className="text-5xl font-extrabold text-gray-800 leading-snug tracking-tight max-w-4xl mx-auto">
+            Masak dari Bahan yang <br/> <span>Kamu Punya!</span>
+          </motion.h1>
+          <motion.p className="text-gray-800 mt-3 text-lg">
+            Temukan resep lezat tanpa perlu belanja banyak. Hemat bahan, anti food waste!
+          </motion.p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </section>
+
+      {/* SEARCH SECTION */}
+      <motion.section
+        initial={{ opacity: 0, y: 60 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="max-w-3xl mx-auto bg-white p-8 shadow-lg rounded-2xl -mt-20"
+      >
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Bahan apa yang kamu punya?
+        </h2>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: { staggerChildren: 0.12 }
+            }
+          }}
+        >
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+            <IngredientInput onAdd={addIngredient} />
+          </motion.div>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+            <IngredientList items={ingredients} onRemove={removeIngredient} />
+          </motion.div>
+
+          <motion.p
+            variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+            className="text-gray-600 mt-4"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Bahan populer:
+          </motion.p>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+            <IngredientTag onSelect={addIngredient} />
+            </motion.div>
+          </motion.div>
+
+        {/* BUTTON */}
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="flex justify-center"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <Button
+              className="mx-auto block w-auto px-10 rounded-xl mt-6 py-3 
+              text-xl bg-green-400 hover:bg-green-500 text-white font-medium"
+            >
+              Cari Resep
+            </Button>
+          </motion.div>
+
+      </motion.section>
+        {/* TODAY’S PICK SECTION */}
+        <TodaysPick />
+
+    </main>
   );
 }
