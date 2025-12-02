@@ -1,31 +1,78 @@
-import { ResultSetHeader } from "mysql2";
 import { db } from "../config/db";
+import {
+  findBahanByIds,
+  insertResep,
+  insertResepBahan,
+} from "../repositories/resep.repository";
+import { BahanInput, TambahResepInput } from "../types/resep.types";
 
-export const insertResep = async (data: {
-  id_user: number;
-  id_kategori: number;
-  nama_resep: string;
-  deskripsi: string;
-  langkah_memasak: string;
-  waktu_memasak: number;
-  foto_resep: string;
-}) => {
-  const query = `
-  INSERT INTO resep (
-  id_user, id_kategori, nama_resep, deskripsi, langkah_memasak, waktu_memasak, foto_resep
-  ) VALUES (?,?,?,?,?,?,?)
-  `;
+class ServiceError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+}
 
-  const values = [
-    data.id_user,
-    data.id_kategori,
-    data.nama_resep,
-    data.deskripsi,
-    data.langkah_memasak,
-    data.waktu_memasak,
-    data.foto_resep,
-  ];
+export const buatResepService = async (
+  data: TambahResepInput,
+  userId: number
+) => {
+  console.log(data);
+  // Basic validation
+  if (!data.nama_resep || !data.deskripsi || !data.id_kategori) {
+    throw new ServiceError("DATA_TIDAK_LENGKAP", "DATA_TIDAK_LENGKAP");
+  }
 
-  const [result] = await db.query<ResultSetHeader>(query, values);
-  return result;
+  if (!["Mudah", "Normal", "Sulit"].includes(data.tingkat_kesulitan)) {
+    throw new ServiceError(
+      "TINGKAT_KESULITAN_INVALID",
+      "TINGKAT_KESULITAN_INVALID"
+    );
+  }
+
+  if (!Number.isInteger(data.waktu_masak) || data.waktu_masak < 0) {
+    throw new ServiceError("WAKTU_MASAK_INVALID", "WAKTU_MASAK_INVALID");
+  }
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // Validate bahan: extract IDs from input
+    const bahanInputs: BahanInput[] = data.bahan || [];
+    const bahanIds = Array.from(new Set(bahanInputs.map((b) => b.id_bahan)));
+
+    // Check bahan exist
+    if (bahanIds.length > 0) {
+      const found = await findBahanByIds(conn, bahanIds);
+      const foundIds = found.map((r) => r.id_bahan);
+      const missing = bahanIds.filter((id) => !foundIds.includes(id));
+      if (missing.length > 0) {
+        throw new ServiceError(
+          `BAHAN_NOT_FOUND: ${missing.join(",")}`,
+          "BAHAN_NOT_FOUND"
+        );
+      }
+      // optionally you can map satuan if needed by frontend or to store snapshot
+    }
+
+    // Insert resep
+    const idResep = await insertResep(conn, data, userId);
+
+    // Insert resep_bahan (bulk)
+    if (bahanInputs.length > 0) {
+      await insertResepBahan(conn, idResep, bahanInputs);
+    }
+
+    await conn.commit();
+    return { id_resep: idResep };
+  } catch (err) {
+    await conn.rollback();
+    if (err instanceof ServiceError) throw err;
+    console.error("buatResepService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
+  } finally {
+    conn.release();
+  }
 };

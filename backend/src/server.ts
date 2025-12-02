@@ -2,7 +2,7 @@ import { configDotenv } from "dotenv";
 import app from "./app"; // Mengimpor aplikasi dari app.ts
 import { createServer } from "http"; // Membuat server HTTP
 
-const PORT = 8080;
+const PORT = 2045;
 
 configDotenv();
 

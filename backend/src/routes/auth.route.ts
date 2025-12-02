@@ -1,11 +1,14 @@
 import { Router } from "express";
-import { register } from "../controllers/auth.controller";
 import { auth } from "../middlewares/authMiddleware";
+import {
+  loginController,
+  registerController,
+} from "../controllers/auth.controller";
 
 const router = Router();
 
-router.post("/register", register);
-// router.post("/login", login);
+router.post("/", registerController);
+router.post("/login", loginController);
 // router.get("/me", auth, (req, res) => {
 //   res.json({ user: req.user });
 // });

@@ -15,12 +15,23 @@
 // app.use(errorHandler);
 
 import { errorHandler } from "./middlewares/errorHandler";
+import cors from "cors";
 import express from "express";
 import resepRoutes from "./routes/resep.routes"; // Pastikan path ini sesuai dengan struktur folder
 import authRoutes from "./routes/auth.route";
 import { logger } from "./middlewares/errorHandler";
 
 const app = express();
+
+app.use(logger);
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 // Middleware untuk parsing JSON request body
 app.use(express.json()); // Middleware yang dibutuhkan agar Express bisa menerima data JSON dalam body request

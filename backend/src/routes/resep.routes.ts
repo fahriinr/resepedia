@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { createResep } from "../controllers/resep.controller";
+import { auth } from "../middlewares/authMiddleware";
+import { buatResep } from "../controllers/resep.controller";
 
 const router = Router();
 
-router.post("/", createResep);
+// POST /api/resep
+router.post("/", auth, buatResep);
 
 export default router;

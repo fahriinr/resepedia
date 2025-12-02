@@ -1,16 +1,32 @@
 import { Request, Response } from "express";
-import { insertResep } from "../services/resep.service";
+import { buatResepService } from "../services/resep.service";
 
-export const createResep = async (req: Request, res: Response) => {
+const requiredFields = [
+  "nama_resep",
+  "deskripsi",
+  "foto",
+  "id_kategori",
+  "tingkat_kesulitan",
+  "waktu_masak",
+  "bahan",
+  "langkah_memasak",
+];
+
+export const buatResep = async (req: Request, res: Response) => {
   try {
-    const data = req.body;
-    const result = await insertResep(data);
-    res
-      .status(201)
-      .json({ message: "Resep Berhasil Ditambahkan!", id: result.insertId });
-  } catch (error: any) {
-    res
-      .status(500)
-      .json({ error: "Gagal Menambahkan Resep!", detail: error.message });
+    const userId = req.user?.id; // dari middleware auth
+    if (!userId) return res.status(401).json({ message: "UNAUTHORIZED" });
+
+    const body = req.body;
+
+    const result = await buatResepService(body, userId);
+
+    res.json({
+      message: "Resep berhasil dibuat",
+      result,
+    });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ message: err.message || "SERVER_ERROR" });
   }
 };
