@@ -13,7 +13,7 @@ export const insertResep = async (data: {
   const query = `
   INSERT INTO resep (
   id_user, id_kategori, nama_resep, deskripsi, langkah_memasak, waktu_memasak, foto_resep
-  ) VALUES (?,?,?,?,?,?)
+  ) VALUES (?,?,?,?,?,?,?)
   `;
 
   const values = [
