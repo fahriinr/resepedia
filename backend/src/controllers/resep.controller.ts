@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { buatResepService } from "../services/resep.service";
+import {
+  buatResepService,
+  getAllResepService,
+  getResepByIdService,
+} from "../services/resep.service";
 
 const requiredFields = [
   "nama_resep",
@@ -27,6 +31,46 @@ export const buatResep = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error(err);
+    res.status(500).json({ message: err.message || "SERVER_ERROR" });
+  }
+};
+
+export const getAllResep = async (req: Request, res: Response) => {
+  try {
+    const result = await getAllResepService();
+
+    res.json({
+      message: "Berhasil mendapatkan data resep",
+      data: result,
+    });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ message: err.message || "SERVER_ERROR" });
+  }
+};
+
+export const getResepById = async (req: Request, res: Response) => {
+  try {
+    const idResep = parseInt(req.params.id);
+
+    if (isNaN(idResep)) {
+      return res.status(400).json({ message: "ID_RESEP_INVALID" });
+    }
+
+    const result = await getResepByIdService(idResep);
+
+    res.json({
+      message: "Berhasil mendapatkan detail resep",
+      data: result,
+    });
+  } catch (err: any) {
+    console.error(err);
+    if (err.code === "RESEP_NOT_FOUND") {
+      return res.status(404).json({ message: err.message });
+    }
+    if (err.code === "ID_RESEP_INVALID") {
+      return res.status(400).json({ message: err.message });
+    }
     res.status(500).json({ message: err.message || "SERVER_ERROR" });
   }
 };

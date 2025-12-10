@@ -3,6 +3,8 @@ import {
   findBahanByIds,
   insertResep,
   insertResepBahan,
+  getAllResep,
+  getResepById,
 } from "../repositories/resep.repository";
 import { BahanInput, TambahResepInput } from "../types/resep.types";
 
@@ -74,5 +76,35 @@ export const buatResepService = async (
     throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
   } finally {
     conn.release();
+  }
+};
+
+export const getAllResepService = async () => {
+  try {
+    const resepList = await getAllResep();
+    return resepList;
+  } catch (err) {
+    console.error("getAllResepService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
+  }
+};
+
+export const getResepByIdService = async (idResep: number) => {
+  try {
+    if (!Number.isInteger(idResep) || idResep <= 0) {
+      throw new ServiceError("ID_RESEP_INVALID", "ID_RESEP_INVALID");
+    }
+
+    const resep = await getResepById(idResep);
+
+    if (!resep) {
+      throw new ServiceError("RESEP_NOT_FOUND", "RESEP_NOT_FOUND");
+    }
+
+    return resep;
+  } catch (err) {
+    if (err instanceof ServiceError) throw err;
+    console.error("getResepByIdService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
   }
 };

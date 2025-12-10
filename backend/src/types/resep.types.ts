@@ -13,5 +13,6 @@ export interface TambahResepInput {
   tingkat_kesulitan: TingkatKesulitan;
   waktu_masak: number;
   langkah_memasak: string;
+  porsi: string;
   bahan: BahanInput[];
 }
