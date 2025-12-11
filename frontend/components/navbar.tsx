@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { PiChefHatDuotone } from "react-icons/pi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
+import { CircleUserRound } from "lucide-react";
 
 export default function Navbar() {
-    const { data: session } = useSession();
     const pathname = usePathname();
     const router = useRouter();
 
@@ -29,7 +28,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="w-full relative flex items-center justify-center px-10 py-4 bg-white shadow-sm">
+        <nav className="w-full flex items-center justify-center px-10 py-4 bg-white shadow-sm">
         {/* Logo kiri */}
         <Link href="/" className="absolute left-10 flex items-center space-x-2">
             <PiChefHatDuotone size={38} className="text-green-300" />
@@ -55,24 +54,7 @@ export default function Navbar() {
                 + Tambah Resep
             </button>
 
-            {/* LOGIN / LOGOUT */}
-            {!session ? (
-                <Link
-                href="/auth/login"
-                className="flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-xl font-semibold text-sm hover:bg-green-600 transition"
-                >
-                <FiLogIn size={18} />
-                Login
-                </Link>
-            ) : (
-                <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-xl font-semibold text-sm hover:bg-red-600 transition"
-                >
-                <FiLogOut size={18} />
-                Logout
-                </button>
-            )}
+            <CircleUserRound className="w-8 h-8 text-black"/>
             </div>
         )}
         </nav>

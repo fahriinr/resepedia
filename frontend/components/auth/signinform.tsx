@@ -20,6 +20,9 @@ export default function SignInForm() {
 
         console.log(res.data);
 
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+localStorage.setItem("token", res.data.token);
+
         router.push("/"); // redirect
         } catch (err: any) {
         alert(err.response?.data?.message || "Login gagal");
