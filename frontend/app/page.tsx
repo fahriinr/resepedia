@@ -30,6 +30,8 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-green-50 pb-20">
+  return (
+    <main className="min-h-screen bg-green-50 pb-20">
 
       <section className="relative text-center py-20 bg-cover bg-center bg-no-repeat">
         <div className="relative z-10">
@@ -66,16 +68,16 @@ export default function HomePage() {
               <IngredientInput onAdd={addIngredient} />
             </motion.div>
 
-            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
-              <IngredientList items={ingredients} onRemove={removeIngredient} />
-            </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+            <IngredientList items={ingredients} onRemove={removeIngredient} />
+          </motion.div>
 
-            <motion.p
-              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
-              className="text-gray-600 mt-4"
-            >
-              Bahan populer:
-            </motion.p>
+          <motion.p
+            variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+            className="text-gray-600 mt-4"
+          >
+            Bahan populer:
+          </motion.p>
 
             <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
               <IngredientTag onSelect={addIngredient} />
