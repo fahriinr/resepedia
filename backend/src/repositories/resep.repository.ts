@@ -62,6 +62,7 @@ export const findBahanByIds = async (
 
 export const getAllResep = async (): Promise<
   Array<{
+    id_resep: number;
     foto_resep: string;
     nama_resep: string;
     waktu_memasak: number;
@@ -69,12 +70,13 @@ export const getAllResep = async (): Promise<
   }>
 > => {
   const [rows]: [RowDataPacket[], any] = await db.query(
-    `SELECT foto_resep, nama_resep, waktu_memasak, tingkat_kesulitan 
+    `SELECT id_resep, foto_resep, nama_resep, waktu_memasak, tingkat_kesulitan 
      FROM resep 
      ORDER BY id_resep DESC`
   );
 
   return rows as Array<{
+    id_resep: number;
     foto_resep: string;
     nama_resep: string;
     waktu_memasak: number;
@@ -138,4 +140,83 @@ export const getResepById = async (
     ...resep,
     bahan,
   };
+};
+
+export const searchResepByBahan = async (
+  bahanIds: number[]
+): Promise<
+  Array<{
+    id_resep: number;
+    foto_resep: string;
+    nama_resep: string;
+    waktu_memasak: number;
+    tingkat_kesulitan: string;
+    persentase_kecocokan: number;
+    total_bahan: number;
+    bahan_cocok: number;
+  }>
+> => {
+  if (!bahanIds || bahanIds.length === 0) {
+    return [];
+  }
+
+  const placeholders = bahanIds.map(() => "?").join(",");
+
+  // Query untuk mencari resep yang memiliki minimal satu bahan yang dicari
+  // dan menghitung persentase kecocokan
+  // Menggunakan subquery untuk menghitung total bahan dan bahan yang cocok
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT 
+      r.id_resep,
+      r.foto_resep,
+      r.nama_resep,
+      r.waktu_memasak,
+      r.tingkat_kesulitan,
+      (
+        SELECT COUNT(DISTINCT br1.id_bahan)
+        FROM bahan_resep br1
+        WHERE br1.id_resep = r.id_resep
+      ) as total_bahan,
+      (
+        SELECT COUNT(DISTINCT br2.id_bahan)
+        FROM bahan_resep br2
+        WHERE br2.id_resep = r.id_resep
+          AND br2.id_bahan IN (${placeholders})
+      ) as bahan_cocok,
+      ROUND(
+        (
+          SELECT COUNT(DISTINCT br2.id_bahan)
+          FROM bahan_resep br2
+          WHERE br2.id_resep = r.id_resep
+            AND br2.id_bahan IN (${placeholders})
+        ) * 100.0 / 
+        (
+          SELECT COUNT(DISTINCT br1.id_bahan)
+          FROM bahan_resep br1
+          WHERE br1.id_resep = r.id_resep
+        ),
+        2
+      ) as persentase_kecocokan
+    FROM resep r
+    WHERE EXISTS (
+      SELECT 1
+      FROM bahan_resep br
+      WHERE br.id_resep = r.id_resep
+        AND br.id_bahan IN (${placeholders})
+    )
+    HAVING bahan_cocok > 0
+    ORDER BY persentase_kecocokan DESC, total_bahan ASC`,
+    [...bahanIds, ...bahanIds, ...bahanIds]
+  );
+
+  return rows.map((row: RowDataPacket) => ({
+    id_resep: row.id_resep,
+    foto_resep: row.foto_resep,
+    nama_resep: row.nama_resep,
+    waktu_memasak: row.waktu_memasak,
+    tingkat_kesulitan: row.tingkat_kesulitan,
+    persentase_kecocokan: parseFloat(row.persentase_kecocokan) || 0,
+    total_bahan: row.total_bahan,
+    bahan_cocok: row.bahan_cocok,
+  }));
 };

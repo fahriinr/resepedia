@@ -4,9 +4,13 @@ import {
   buatResep,
   getAllResep,
   getResepById,
+  searchResepByBahan,
 } from "../controllers/resep.controller";
 
 const router = Router();
+
+// POST /api/resep/search - Search resep by bahan (no auth required)
+router.post("/search", searchResepByBahan);
 
 // GET /api/resep - Get all resep for homepage (no auth required)
 router.get("/", getAllResep);

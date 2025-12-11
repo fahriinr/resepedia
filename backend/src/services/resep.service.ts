@@ -5,6 +5,7 @@ import {
   insertResepBahan,
   getAllResep,
   getResepById,
+  searchResepByBahan,
 } from "../repositories/resep.repository";
 import { BahanInput, TambahResepInput } from "../types/resep.types";
 
@@ -105,6 +106,32 @@ export const getResepByIdService = async (idResep: number) => {
   } catch (err) {
     if (err instanceof ServiceError) throw err;
     console.error("getResepByIdService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
+  }
+};
+
+export const searchResepByBahanService = async (bahanIds: number[]) => {
+  try {
+    if (!bahanIds || !Array.isArray(bahanIds) || bahanIds.length === 0) {
+      throw new ServiceError("BAHAN_IDS_REQUIRED", "BAHAN_IDS_REQUIRED");
+    }
+
+    // Validate that all IDs are numbers
+    const invalidIds = bahanIds.filter(
+      (id) => !Number.isInteger(id) || id <= 0
+    );
+    if (invalidIds.length > 0) {
+      throw new ServiceError("BAHAN_IDS_INVALID", "BAHAN_IDS_INVALID");
+    }
+
+    // Remove duplicates
+    const uniqueBahanIds = Array.from(new Set(bahanIds));
+
+    const resepList = await searchResepByBahan(uniqueBahanIds);
+    return resepList;
+  } catch (err) {
+    if (err instanceof ServiceError) throw err;
+    console.error("searchResepByBahanService error:", err);
     throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
   }
 };
