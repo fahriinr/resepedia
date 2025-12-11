@@ -25,11 +25,7 @@ export default function Navbar() {
     );
 
     const handleTambahResep = () => {
-        if (!session) {
-        router.push("/auth/login");
-        } else {
-        router.push("/tambahresep");
-        }
+        router.push("/resep/tambah");
     };
 
     return (
