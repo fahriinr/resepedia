@@ -23,11 +23,10 @@ app.use(express.json());
 
 app.use(logger);
 
+app.use("/api/auth", authRoutes);
 // Menggunakan router untuk endpoint /api/resep
 app.use("/api/resep", resepRoutes);
 app.use("/api/bahan", bahanRoutes);
-
-app.use("/api/auth", authRoutes);
 
 // Mengatur routing error handler (misalnya, untuk menangani error global)
 app.use(errorHandler); // Menambahkan error handler middleware

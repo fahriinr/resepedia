@@ -1,12 +1,17 @@
 import { Pool, RowDataPacket } from "mysql2/promise";
 import { db } from "../config/db";
-import { TambahResepInput, BahanInput } from "../types/resep.types";
+import {
+  TambahResepInput,
+  BahanInput,
+  UpdateResepInput,
+} from "../types/resep.types";
 
 export const insertResep = async (
   conn: Pool | any,
   data: TambahResepInput,
   userId: number
 ) => {
+  const langkah_memasak = JSON.stringify(data.langkah_memasak);
   const [result]: any = await db.query(
     `INSERT INTO resep 
             (nama_resep, deskripsi, foto_resep, id_kategori, tingkat_kesulitan, waktu_memasak, langkah_memasak, porsi, id_user)
@@ -18,7 +23,7 @@ export const insertResep = async (
       data.id_kategori,
       data.tingkat_kesulitan,
       data.waktu_masak,
-      data.langkah_memasak,
+      langkah_memasak,
       data.porsi,
       userId,
     ]
@@ -219,4 +224,138 @@ export const searchResepByBahan = async (
     total_bahan: row.total_bahan,
     bahan_cocok: row.bahan_cocok,
   }));
+};
+
+export const checkResepOwnership = async (
+  idResep: number,
+  userId: number
+): Promise<boolean> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT id_resep FROM resep WHERE id_resep = ? AND id_user = ?`,
+    [idResep, userId]
+  );
+  return rows.length > 0;
+};
+
+export const getResepByIdForUpdate = async (
+  idResep: number
+): Promise<{ id_resep: number; id_user: number } | null> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT id_resep, id_user FROM resep WHERE id_resep = ?`,
+    [idResep]
+  );
+  if (rows.length === 0) return null;
+  return rows[0] as { id_resep: number; id_user: number };
+};
+
+export const updateResep = async (
+  conn: Pool | any,
+  idResep: number,
+  data: UpdateResepInput
+) => {
+  const updateFields: string[] = [];
+  const updateValues: any[] = [];
+
+  if (data.nama_resep !== undefined) {
+    updateFields.push("nama_resep = ?");
+    updateValues.push(data.nama_resep);
+  }
+  if (data.deskripsi !== undefined) {
+    updateFields.push("deskripsi = ?");
+    updateValues.push(data.deskripsi);
+  }
+  if (data.foto !== undefined) {
+    updateFields.push("foto_resep = ?");
+    updateValues.push(data.foto);
+  }
+  if (data.id_kategori !== undefined) {
+    updateFields.push("id_kategori = ?");
+    updateValues.push(data.id_kategori);
+  }
+  if (data.tingkat_kesulitan !== undefined) {
+    updateFields.push("tingkat_kesulitan = ?");
+    updateValues.push(data.tingkat_kesulitan);
+  }
+  if (data.waktu_masak !== undefined) {
+    updateFields.push("waktu_memasak = ?");
+    updateValues.push(data.waktu_masak);
+  }
+  if (data.langkah_memasak !== undefined) {
+    updateFields.push("langkah_memasak = ?");
+    updateValues.push(
+      typeof data.langkah_memasak === "string"
+        ? data.langkah_memasak
+        : JSON.stringify(data.langkah_memasak)
+    );
+  }
+  if (data.porsi !== undefined) {
+    updateFields.push("porsi = ?");
+    updateValues.push(data.porsi);
+  }
+
+  if (updateFields.length === 0) {
+    return; // No fields to update
+  }
+
+  updateValues.push(idResep);
+
+  await conn.query(
+    `UPDATE resep SET ${updateFields.join(", ")} WHERE id_resep = ?`,
+    updateValues
+  );
+};
+
+export const deleteResepBahan = async (conn: Pool | any, idResep: number) => {
+  await conn.query(`DELETE FROM bahan_resep WHERE id_resep = ?`, [idResep]);
+};
+
+export const deleteResep = async (conn: Pool | any, idResep: number) => {
+  // First delete bahan_resep (foreign key constraint)
+  await deleteResepBahan(conn, idResep);
+  // Then delete resep
+  await conn.query(`DELETE FROM resep WHERE id_resep = ?`, [idResep]);
+};
+
+export const insertKomentar = async (
+  idResep: number,
+  idUser: number,
+  komentar: string
+): Promise<number> => {
+  const [result]: any = await db.query(
+    `INSERT INTO komentar_rating (id_resep, id_user, isi_komentar) VALUES (?, ?, ?)`,
+    [idResep, idUser, komentar]
+  );
+
+  return result.insertId;
+};
+
+export const getKomentarByResep = async (
+  idResep: number
+): Promise<
+  Array<{
+    id_komentar: number;
+    nama_user: string;
+    komentar: string;
+    created_at: string;
+  }>
+> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT 
+      k.id_komentar,
+      u.name AS nama_user,
+      k.isi_komentar,
+      k.tanggal_komentar
+    FROM komentar_rating k
+    INNER JOIN user u ON k.id_user = u.id_user
+    WHERE k.id_resep = ?
+    ORDER BY k.tanggal_komentar DESC`,
+    [idResep]
+  );
+
+  return rows as Array<{
+    id_komentar: number;
+    nama_user: string;
+    komentar: string;
+    created_at: string;
+  }>;
 };
