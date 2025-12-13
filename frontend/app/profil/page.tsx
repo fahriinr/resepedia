@@ -1,8 +1,10 @@
 "use client";
 
 import { CircleUserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilPage() {
+    const router = useRouter();
     return (
         <div className="min-h-screen bg-green-50 flex justify-center">
         <div className="w-full max-w-5xl bg-white mt-6 rounded-2xl shadow-sm px-8 py-6">
@@ -33,14 +35,15 @@ export default function ProfilPage() {
 
             {/* BUTTON EDIT */}
             <button
-            className="w-full mt-6 rounded-xl bg-gray-200 hover:bg-gray-300 text-black py-2 font-medium transition"
+                onClick={() => router.push("/profil/edit")}
+                className="w-full mt-4 rounded-xl bg-green-500 hover:bg-green-600 text-gray-700 py-2 font-semibold"
             >
             Edit Profile
             </button>
 
             {/* TAB */}
             <div className="flex justify-between mt-8 border-b pb-2">
-            <span className="font-semibold">Resep Saya (0)</span>
+            <span className="text-gray-500">Resep Saya (0)</span>
             <span className="text-gray-500">Favorit (0)</span>
             </div>
 
