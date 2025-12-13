@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";   
@@ -8,18 +8,28 @@ import IngredientList from "@/components/IngredientList";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import TodaysPick from "@/components/todayspick";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+interface Ingredient {
+    id_bahan: number;
+    nama_bahan: string;
+    satuan: string;
+}
 
 export default function HomePage() {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("user");
     if (saved) setUser(JSON.parse(saved));
   }, []);
-  const [ingredients, setIngredients] = useState<string[]>([]);
+  
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
 
-  const addIngredient = (v: string) => {
-    if (!ingredients.includes(v)) {
+  const addIngredient = (v: Ingredient) => {
+    if (!ingredients.some(item => item.id_bahan === v.id_bahan)) {
       setIngredients((prev) => [...prev, v]);
     }
   };
@@ -28,8 +38,23 @@ export default function HomePage() {
     setIngredients((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  return (
-    <main className="min-h-screen bg-green-50 pb-20">
+  const handleSearch = async () => {
+    const bahan_ids = ingredients.map(item => item.id_bahan);
+    try {
+      const response = await axios.post("http://localhost:2045/api/resep/search", {
+        bahan_ids: bahan_ids
+      });
+
+      const results = response.data.data;
+      localStorage.setItem("searchResults", JSON.stringify(results))
+  
+      router.push("/resep")
+    } catch (error) {
+      console.error("Search failed:", error);
+      alert("Search failed. Check console.");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-green-50 pb-20">
 
@@ -92,6 +117,7 @@ export default function HomePage() {
             className="flex justify-center"
           >
             <Button
+              onClick={handleSearch}
               className="w-full px-10 rounded-xl mt-6 py-2 
               text-xl bg-green-400 hover:bg-green-500 text-white font-medium"
             >

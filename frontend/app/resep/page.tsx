@@ -10,6 +10,7 @@ type Resep = {
     nama_resep: string;
     waktu_memasak: number;
     tingkat_kesulitan: string;
+    persentase_kecocokan: number;
 };
 
 export default function ResepPage() {
@@ -25,9 +26,12 @@ export default function ResepPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await fetch("https://api.domain.com/resep");
-                const result = await res.json();
-                setResep(result.data);
+                const saved = localStorage.getItem("searchResults");
+                if (saved) {
+                    setResep(JSON.parse(saved));
+                }
+                console.log(resep)
+
             } catch (err) {
                 console.error("Gagal fetch", err);
             } finally {
@@ -108,7 +112,7 @@ export default function ResepPage() {
             </p>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {resep.map((item) => (
                     <motion.div
                         key={item.id_resep}
@@ -117,17 +121,21 @@ export default function ResepPage() {
                         className="bg-white p-4 rounded-xl shadow-md hover:shadow-xl cursor-pointer"
                         onClick={() => router.push(`/resep/${item.id_resep}`)}
                     >
-                        <div className="h-40 rounded-xl mb-4 overflow-hidden">
+                        <div className="relative h-60 rounded-xl mb-4 overflow-hidden">
+                        <span className="absolute top-3 left-3 bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm z-10">
+                            {item.tingkat_kesulitan}
+                        </span>
+                        <span className="absolute top-3 right-3 bg-orange-400 text-white px-3 py-1 rounded-full text-sm z-10">
+                            {item.persentase_kecocokan}% cocok
+                        </span>
                             <img
-                                src={`https://api.domain.com/images/${item.foto_resep}`}
+                                src={`/img/${item.foto_resep}`}
                                 alt={item.nama_resep}
                                 className="w-full h-full object-cover"
                             />
                         </div>
 
-                        <span className="bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm">
-                            {item.tingkat_kesulitan}
-                        </span>
+                        
 
                         <h3 className="font-semibold text-lg text-gray-800 mt-2">
                             {item.nama_resep}
