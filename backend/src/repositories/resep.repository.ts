@@ -89,6 +89,31 @@ export const getAllResep = async (): Promise<
   }>;
 };
 
+export const getResepByUserId = async (
+  userId: number
+): Promise<
+  Array<{
+    foto_resep: string;
+    nama_resep: string;
+    waktu_memasak: number;
+  }>
+> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT id_resep, foto_resep, nama_resep, waktu_memasak 
+     FROM resep 
+     WHERE id_user = ? 
+     ORDER BY id_resep DESC`,
+    [userId]
+  );
+
+  return rows as Array<{
+    id_resep: number;
+    foto_resep: string;
+    nama_resep: string;
+    waktu_memasak: number;
+  }>;
+};
+
 export const getResepById = async (
   idResep: number
 ): Promise<{

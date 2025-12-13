@@ -13,6 +13,7 @@ import {
   deleteResep,
   insertKomentar,
   getKomentarByResep,
+  getResepByUserId,
 } from "../repositories/resep.repository";
 import {
   BahanInput,
@@ -329,4 +330,9 @@ export const getKomentarResepService = async (idResep: number) => {
     console.error("getKomentarResepService error:", err);
     throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
   }
+};
+
+export const getResepByUserIdService = async (userId: number) => {
+  const resep = await getResepByUserId(userId);
+  return resep;
 };

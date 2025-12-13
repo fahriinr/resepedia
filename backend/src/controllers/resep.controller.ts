@@ -8,6 +8,7 @@ import {
   deleteResepService,
   tambahKomentarService,
   getKomentarResepService,
+  getResepByUserIdService,
 } from "../services/resep.service";
 
 const requiredFields = [
@@ -228,6 +229,23 @@ export const getKomentarResep = async (req: Request, res: Response) => {
     if (err.code === "ID_RESEP_INVALID") {
       return res.status(400).json({ message: err.message });
     }
+    res.status(500).json({ message: err.message || "SERVER_ERROR" });
+  }
+};
+
+export const getResepByUserId = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id; // dari middleware auth
+    if (!userId) return res.status(401).json({ message: "UNAUTHORIZED" });
+
+    const result = await getResepByUserIdService(userId);
+
+    res.json({
+      message: "Berhasil mendapatkan resep user",
+      data: result,
+    });
+  } catch (err: any) {
+    console.error(err);
     res.status(500).json({ message: err.message || "SERVER_ERROR" });
   }
 };

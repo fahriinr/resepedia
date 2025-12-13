@@ -9,6 +9,7 @@ import {
   deleteResep,
   tambahKomentar,
   getKomentarResep,
+  getResepByUserId,
 } from "../controllers/resep.controller";
 
 const router = Router();
@@ -24,6 +25,9 @@ router.post("/:id/comments", auth, tambahKomentar);
 
 // GET /api/resep - Get all resep for homepage (no auth required)
 router.get("/", getAllResep);
+
+// GET /api/resep/my-resep - Get resep by logged in user (auth required)
+router.get("/my-resep", auth, getResepByUserId);
 
 // GET /api/resep/:id - Get resep by ID (no auth required)
 router.get("/:id", getResepById);
