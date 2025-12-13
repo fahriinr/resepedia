@@ -54,7 +54,9 @@ export default function Navbar() {
                 + Tambah Resep
             </button>
 
-            <CircleUserRound className="w-8 h-8 text-black"/>
+            <CircleUserRound
+                onClick={() => router.push("/profil")}
+                className="w-8 h-8 text-black"/>
             </div>
         )}
         </nav>

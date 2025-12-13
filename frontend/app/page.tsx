@@ -30,8 +30,6 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-green-50 pb-20">
-  return (
-    <main className="min-h-screen bg-green-50 pb-20">
 
       <section className="relative text-center py-20 bg-cover bg-center bg-no-repeat">
         <div className="relative z-10">
