@@ -41,7 +41,7 @@ export default function TentangPage() {
             className="flex justify-center"
           >
             <Image
-              src="/sayur.jpg" // ganti sesuai file yang kamu punya
+              src="/img/dummy4.jpg"
               alt="Sayuran"
               width={550}
               height={350}

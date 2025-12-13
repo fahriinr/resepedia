@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import Select, { SingleValue, MultiValue, ActionMeta } from "react-select";
+import { SingleValue, MultiValue, ActionMeta } from "react-select";
 import axios from "axios";
 import ClientSelect from "./ClientSelect";
 
