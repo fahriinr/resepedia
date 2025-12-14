@@ -10,12 +10,20 @@ import {
   tambahKomentar,
   getKomentarResep,
   getResepByUserId,
+  tambahFavoritResep,
+  getFavoritResepById,
 } from "../controllers/resep.controller";
 
 const router = Router();
 
 // POST /api/resep/search - Search resep by bahan (no auth required)
 router.post("/search", searchResepByBahan);
+
+// POST /api/resep/favorit - Add favorit resep (auth required)
+router.post("/favorit", auth, tambahFavoritResep);
+
+// GET /api/resep/favorit - Get favorit resep by logged in user (auth required)
+router.get("/favorit", auth, getFavoritResepById);
 
 // GET /api/resep/:id/comments - Get komentar list for a resep (no auth required)
 router.get("/:id/comments", getKomentarResep);

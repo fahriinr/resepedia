@@ -39,3 +39,13 @@ export interface KomentarItem {
   komentar: string;
   created_at: string;
 }
+
+export interface TambahFavoritInput {
+  id_resep: number;
+}
+
+export interface FavoritResepItem {
+  foto_resep: string;
+  nama_resep: string;
+  waktu_memasak: number;
+}

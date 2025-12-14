@@ -12,7 +12,7 @@ export const insertResep = async (
   userId: number
 ) => {
   const langkah_memasak = JSON.stringify(data.langkah_memasak);
-  const [result]: any = await db.query(
+  const [result]: any = await conn.query(
     `INSERT INTO resep 
             (nama_resep, deskripsi, foto_resep, id_kategori, tingkat_kesulitan, waktu_memasak, langkah_memasak, porsi, id_user)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -39,7 +39,7 @@ export const insertResepBahan = async (
 ) => {
   const values = bahanList.map((x) => [id_resep, x.id_bahan, x.takaran]);
 
-  await db.query(
+  await conn.query(
     `INSERT INTO bahan_resep (id_resep, id_bahan, takaran) VALUES ?`,
     [values]
   );
@@ -124,6 +124,7 @@ export const getResepById = async (
   porsi: string;
   langkah_memasak: string;
   bahan: Array<{
+    id_bahan: number;
     nama_bahan: string;
     takaran: number;
     satuan: string;
@@ -152,7 +153,7 @@ export const getResepById = async (
 
   // Get ingredients (bahan) for this recipe
   const [bahanRows]: [RowDataPacket[], any] = await db.query(
-    `SELECT b.nama_bahan, br.takaran, b.satuan
+    `SELECT br.id_bahan, b.nama_bahan, br.takaran, b.satuan
      FROM bahan_resep br
      INNER JOIN bahan b ON br.id_bahan = b.id_bahan
      WHERE br.id_resep = ?
@@ -161,6 +162,7 @@ export const getResepById = async (
   );
 
   const bahan = bahanRows.map((row: RowDataPacket) => ({
+    id_bahan: row.id_bahan,
     nama_bahan: row.nama_bahan,
     takaran: row.takaran,
     satuan: row.satuan,
@@ -382,5 +384,91 @@ export const getKomentarByResep = async (
     nama_user: string;
     komentar: string;
     created_at: string;
+  }>;
+};
+
+export const checkFavoritExists = async (
+  idResep: number,
+  userId: number
+): Promise<boolean> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT id_favorit_resep FROM favorit_resep WHERE id_resep = ? AND id_user = ?`,
+    [idResep, userId]
+  );
+  return rows.length > 0;
+};
+
+export const insertFavoritResep = async (
+  idResep: number,
+  userId: number
+): Promise<number> => {
+  const [result]: any = await db.query(
+    `INSERT INTO favorit_resep (id_resep, id_user, tanggal_disimpan) VALUES (?, ?, NOW())`,
+    [idResep, userId]
+  );
+
+  return result.insertId;
+};
+
+export const getFavoritResepById = async (
+  idFavoritResep: number
+): Promise<{
+  id_resep: number;
+  foto_resep: string;
+  nama_resep: string;
+  waktu_memasak: number;
+} | null> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT 
+      fr.id_favorit_resep,
+      r.foto_resep,
+      r.nama_resep,
+      r.waktu_memasak
+    FROM favorit_resep fr
+    INNER JOIN resep r ON fr.id_resep = r.id_resep
+    WHERE fr.id_favorit_resep = ?`,
+    [idFavoritResep]
+  );
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return rows[0] as {
+    id_resep: number;
+    foto_resep: string;
+    nama_resep: string;
+    waktu_memasak: number;
+  };
+};
+
+export const getFavoritResepByUserId = async (
+  userId: number
+): Promise<
+  Array<{
+    id_resep: number;
+    foto_resep: string;
+    nama_resep: string;
+    waktu_memasak: number;
+  }>
+> => {
+  const [rows]: [RowDataPacket[], any] = await db.query(
+    `SELECT 
+      r.id_resep,
+      r.foto_resep,
+      r.nama_resep,
+      r.waktu_memasak
+    FROM favorit_resep fr
+    INNER JOIN resep r ON fr.id_resep = r.id_resep
+    WHERE fr.id_user = ?
+    ORDER BY fr.tanggal_disimpan DESC`,
+    [userId]
+  );
+
+  return rows as Array<{
+    id_resep: number;
+    foto_resep: string;
+    nama_resep: string;
+    waktu_memasak: number;
   }>;
 };

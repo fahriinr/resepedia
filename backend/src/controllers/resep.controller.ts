@@ -9,6 +9,9 @@ import {
   tambahKomentarService,
   getKomentarResepService,
   getResepByUserIdService,
+  tambahFavoritResepService,
+  getFavoritResepByIdService,
+  getFavoritResepByUserIdService,
 } from "../services/resep.service";
 
 const requiredFields = [
@@ -243,6 +246,56 @@ export const getResepByUserId = async (req: Request, res: Response) => {
     res.json({
       message: "Berhasil mendapatkan resep user",
       data: result,
+    });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ message: err.message || "SERVER_ERROR" });
+  }
+};
+
+export const tambahFavoritResep = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id; // dari middleware auth
+    if (!userId) return res.status(401).json({ message: "UNAUTHORIZED" });
+
+    const { id_resep } = req.body;
+
+    if (!id_resep || !Number.isInteger(parseInt(id_resep))) {
+      return res.status(400).json({ message: "ID_RESEP_INVALID" });
+    }
+
+    const result = await tambahFavoritResepService(parseInt(id_resep), userId);
+
+    res.json({
+      message: "Favorit berhasil ditambahkan",
+      result,
+    });
+  } catch (err: any) {
+    console.error(err);
+    if (err.code === "RESEP_NOT_FOUND") {
+      return res.status(404).json({ message: err.message });
+    }
+    if (
+      err.code === "ID_RESEP_INVALID" ||
+      err.code === "FAVORIT_ALREADY_EXISTS"
+    ) {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: err.message || "SERVER_ERROR" });
+  }
+};
+
+export const getFavoritResepById = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id; // dari middleware auth
+    if (!userId) return res.status(401).json({ message: "UNAUTHORIZED" });
+
+    const result = await getFavoritResepByUserIdService(userId);
+
+    res.json({
+      message: "Berhasil mendapatkan favorit resep",
+      data: result,
+      total: result.length,
     });
   } catch (err: any) {
     console.error(err);

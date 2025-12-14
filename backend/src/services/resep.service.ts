@@ -14,12 +14,17 @@ import {
   insertKomentar,
   getKomentarByResep,
   getResepByUserId,
+  checkFavoritExists,
+  insertFavoritResep,
+  getFavoritResepById,
+  getFavoritResepByUserId,
 } from "../repositories/resep.repository";
 import {
   BahanInput,
   TambahResepInput,
   UpdateResepInput,
   TambahKomentarInput,
+  TambahFavoritInput,
 } from "../types/resep.types";
 
 class ServiceError extends Error {
@@ -335,4 +340,65 @@ export const getKomentarResepService = async (idResep: number) => {
 export const getResepByUserIdService = async (userId: number) => {
   const resep = await getResepByUserId(userId);
   return resep;
+};
+
+export const tambahFavoritResepService = async (
+  idResep: number,
+  userId: number
+) => {
+  // Validate idResep
+  if (!Number.isInteger(idResep) || idResep <= 0) {
+    throw new ServiceError("ID_RESEP_INVALID", "ID_RESEP_INVALID");
+  }
+
+  // Check if resep exists
+  const resep = await getResepByIdForUpdate(idResep);
+  if (!resep) {
+    throw new ServiceError("RESEP_NOT_FOUND", "RESEP_NOT_FOUND");
+  }
+
+  // Check if favorit already exists
+  const favoritExists = await checkFavoritExists(idResep, userId);
+  if (favoritExists) {
+    throw new ServiceError("FAVORIT_ALREADY_EXISTS", "FAVORIT_ALREADY_EXISTS");
+  }
+
+  try {
+    const idFavoritResep = await insertFavoritResep(idResep, userId);
+    return { id_favorit_resep: idFavoritResep };
+  } catch (err) {
+    if (err instanceof ServiceError) throw err;
+    console.error("tambahFavoritResepService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
+  }
+};
+
+export const getFavoritResepByIdService = async (idFavoritResep: number) => {
+  // Validate idFavoritResep
+  if (!Number.isInteger(idFavoritResep) || idFavoritResep <= 0) {
+    throw new ServiceError("ID_FAVORIT_INVALID", "ID_FAVORIT_INVALID");
+  }
+
+  try {
+    const favorit = await getFavoritResepById(idFavoritResep);
+    if (!favorit) {
+      throw new ServiceError("FAVORIT_NOT_FOUND", "FAVORIT_NOT_FOUND");
+    }
+    return favorit;
+  } catch (err) {
+    if (err instanceof ServiceError) throw err;
+    console.error("getFavoritResepByIdService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
+  }
+};
+
+export const getFavoritResepByUserIdService = async (userId: number) => {
+  try {
+    const favoritList = await getFavoritResepByUserId(userId);
+    return favoritList;
+  } catch (err) {
+    if (err instanceof ServiceError) throw err;
+    console.error("getFavoritResepByUserIdService error:", err);
+    throw new ServiceError("SERVER_ERROR", "SERVER_ERROR");
+  }
 };
