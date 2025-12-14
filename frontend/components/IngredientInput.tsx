@@ -58,7 +58,7 @@ export default function IngredientInput({ onAdd }: { onAdd: (v: Ingredient) => v
                 onChange={handleChange}
                 options={options}
                 placeholder="Cari bahan yang kamu punya..."
-                className="text-gray-700"
+                className="text-gray-700 text-start"
                 styles={{
                     control: (base) => ({
                         ...base,

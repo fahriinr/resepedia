@@ -18,7 +18,7 @@ export default function IngredientTag({ onSelect }: { onSelect: (v: Ingredient) 
                 const response = await axios.get("http://localhost:2045/api/bahan");
                 if (response.data && response.data.data) {
                     const fetched: Ingredient[] = response.data.data;
-                    setIngredients(fetched.slice(0, 18));
+                    setIngredients(fetched.slice(0, 17));
                 }
             } catch (error) {
                 console.error("Failed to fetch ingredients:", error);

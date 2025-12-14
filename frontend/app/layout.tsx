@@ -3,12 +3,16 @@
 import "./globals.css";
 import Navbar from "@/components/navbar";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
-            <Navbar />      {/* Pastikan navbar di dalam provider */}
-            {children}
+        <Navbar />
+        {children}
       </body>
     </html>
   );

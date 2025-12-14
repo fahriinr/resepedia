@@ -74,7 +74,7 @@ export default function HomePage() {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="max-w-3xl mx-auto bg-white p-8 shadow-lg rounded-2xl -mt-20"
         >
-          <h2 className="text-2xl font-semibold text-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-800  ">
             Bahan apa yang kamu punya?
           </h2>
 
@@ -99,7 +99,7 @@ export default function HomePage() {
 
           <motion.p
             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
-            className="text-gray-600 mt-4"
+            className="text-gray-600 mt-4 text-start"
           >
             Bahan populer:
           </motion.p>

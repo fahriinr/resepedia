@@ -5,19 +5,10 @@ import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-
-
-export interface resep  {
-      id_resep: number,
-      foto_resep: string,
-      nama_resep: string,
-      waktu_memasak: number,
-      tingkat_kesulitan: string
-}
-
+import { resepBanner } from "../types/resepBanner";
 
 export default function TodaysPick() {
-  const [reseps, setReseps] = useState<resep[]>([]);
+  const [reseps, setReseps] = useState<resepBanner[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,11 +45,10 @@ export default function TodaysPick() {
             whileHover={{ scale: 1.03 }}
             className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer"
             onClick={() => router.push(`/resep/${resep.id_resep}`)}
-
           >
             <div className="h-44 w-full bg-gray-300">
               <img
-                src={`/img/${resep.foto_resep}`}
+                src={`/img/dummy7.jpg`}
                 alt={resep.foto_resep}
                 className="h-44 w-full object-cover"
               />
@@ -70,9 +60,7 @@ export default function TodaysPick() {
               </h3>
               <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                <span>
-                {resep.waktu_memasak}min
-                </span>
+                <span>{resep.waktu_memasak}min</span>
               </div>
             </div>
           </motion.div>

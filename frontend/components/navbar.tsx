@@ -5,10 +5,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { PiChefHatDuotone } from "react-icons/pi";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { CircleUserRound } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+    
+    useEffect(() => {
+        const saved = localStorage.getItem("user");
+        if (saved) setUser(JSON.parse(saved));
+    }, []);
 
     const isAuthPage = pathname.startsWith("/auth");
 
